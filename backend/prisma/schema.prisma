@@ -1,0 +1,63 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  GUEST
+  STAFF
+}
+
+enum ReservationStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
+
+model User {
+  id           Int            @id @default(autoincrement())
+  email        String         @unique
+  username     String         
+  password     String
+  role         Role           @default(GUEST)
+  reservations Reservation[]
+  reviews      Review[]
+}
+
+model Room {
+  id            Int            @id @default(autoincrement())
+  roomNumber    String         @unique
+  roomType      String
+  reservations  Reservation[]
+  reviews       Review[]
+}
+
+model Reservation {
+  id           Int               @id @default(autoincrement())
+  checkInDate  DateTime
+  checkOutDate DateTime
+  status       ReservationStatus @default(PENDING)
+
+  userId Int
+  roomId Int
+
+  user User @relation(fields: [userId], references: [id])
+  room Room @relation(fields: [roomId], references: [id])
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  content   String
+  rating    Int
+  createdAt DateTime @default(now())
+
+  userId Int
+  roomId Int
+
+  user User @relation(fields: [userId], references: [id])
+  room Room @relation(fields: [roomId], references: [id])
+}
