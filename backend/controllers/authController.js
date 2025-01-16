@@ -2,8 +2,10 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const prisma = require("../models/prismaClient");
 
+// JWT iz .env fajla
 const JWT_SECRET = process.env.JWT_SECRET;
 
+//Register controller
 exports.register = async (req, res) => {
   try {
     const { email, username, password, role } = req.body;
@@ -24,14 +26,14 @@ exports.register = async (req, res) => {
         email,
         username,
         password: hashedPassword,
-        role: role || "GUESTs",
+        role: role || "GUEST",
       },
     });
 
     const token = jwt.sign(
       { userId: newUser.id, role: newUser.role },
       JWT_SECRET,
-      { expiresIn: "1h" }
+      { expiresIn: "1h" },
     );
 
     return res.status(201).json({
@@ -50,6 +52,7 @@ exports.register = async (req, res) => {
   }
 };
 
+//Login controller
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
