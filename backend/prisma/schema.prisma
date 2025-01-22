@@ -19,21 +19,25 @@ enum ReservationStatus {
 }
 
 model User {
-  id           Int            @id @default(autoincrement())
-  email        String         @unique
-  username     String         
+  id           Int           @id @default(autoincrement())
+  email        String        @unique
+  username     String
   password     String
-  role         Role           @default(GUEST)
+  role         Role          @default(GUEST)
   reservations Reservation[]
   reviews      Review[]
 }
 
 model Room {
-  id            Int            @id @default(autoincrement())
-  roomNumber    String         @unique
-  roomType      String
-  reservations  Reservation[]
-  reviews       Review[]
+  id          Int      @id @default(autoincrement())
+  roomNumber  String   @unique
+  roomType    String
+  description String?
+  price       Decimal?
+  imageUrl    String?
+
+  reservations Reservation[]
+  reviews      Review[]
 }
 
 model Reservation {

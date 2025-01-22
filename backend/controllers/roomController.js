@@ -1,6 +1,6 @@
 const prisma = require("../models/prismaClient");
 
-// GET sve sobe
+// GET: sve sobe
 const getAllRooms = async (req, res) => {
   try {
     const rooms = await prisma.room.findMany();
@@ -11,82 +11,90 @@ const getAllRooms = async (req, res) => {
   }
 };
 
-//GET soba by Id
+// GET: jedna soba po ID
 const getRoomById = async (req, res) => {
   try {
-    const roomId = parseInt(re.params.id, 10);
+    const roomId = parseInt(req.params.id, 10);
 
     const room = await prisma.room.findUnique({
       where: { id: roomId },
     });
 
     if (!room) {
-      return res.status(404).json({ error: "Soba nije pronadjena" });
+      return res.status(404).json({ error: "Soba nije pronađena" });
     }
-    res.json(room);
+    return res.json(room);
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Server error" });
   }
 };
 
-//POST za kreiranje soba
+// POST: kreiranje nove sobe
 const createRoom = async (req, res) => {
   try {
-    const { roomNumber, roomType } = req.body;
+    const { roomNumber, roomType, description, price, imageUrl } = req.body;
 
+    // Provjera postoji li vec soba s tim brojem
     const existingRoom = await prisma.room.findUnique({
       where: { roomNumber },
     });
-
     if (existingRoom) {
-      return res.status(500).json({ error: "Soba s tim brojem vec postoji." });
+      return res.status(400).json({ error: "Soba s tim brojem već postoji." });
     }
 
+    // Kreiramo novu sobu
     const newRoom = await prisma.room.create({
       data: {
         roomNumber,
         roomType,
+        description,
+        price, // moze biti decimal ili null
+        imageUrl, // moze biti null ako nije poslano
       },
     });
 
-    return res.status(200).json(newRoom);
+    return res.status(201).json(newRoom);
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Server error" });
   }
 };
 
-//PUT update sobe
+// PUT: ažuriranje sobe
 const updateRoom = async (req, res) => {
   try {
     const roomId = parseInt(req.params.id, 10);
-    const { roomNumber, roomType } = req.body;
+    const { roomNumber, roomType, description, price, imageUrl } = req.body;
 
+    // Provjeri postoji li soba
     const existingRoom = await prisma.room.findUnique({
       where: { id: roomId },
     });
-
     if (!existingRoom) {
-      return res.status(500).json({ error: "Soba nije pronadjena" });
+      return res.status(404).json({ error: "Soba nije pronađena" });
     }
 
-    const updateRoom = await prisma.room.update({
+    // Ažuriraj
+    const updatedRoom = await prisma.room.update({
       where: { id: roomId },
       data: {
         roomNumber,
         roomType,
+        description,
+        price,
+        imageUrl,
       },
     });
 
-    return res.json(updateRoom);
+    return res.json(updatedRoom);
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Server error" });
   }
 };
 
-//DELETE brisanje soba
+// DELETE: brisanje sobe
 const deleteRoom = async (req, res) => {
   try {
     const roomId = parseInt(req.params.id, 10);
@@ -94,16 +102,15 @@ const deleteRoom = async (req, res) => {
     const existingRoom = await prisma.room.findUnique({
       where: { id: roomId },
     });
-
     if (!existingRoom) {
-      return res.status(500).json({ error: "Soba nije pronadjena" });
+      return res.status(404).json({ error: "Soba nije pronađena" });
     }
 
     await prisma.room.delete({
       where: { id: roomId },
     });
 
-    return res.json({ message: "Soba uspjesno obrisana" });
+    return res.json({ message: "Soba uspješno obrisana" });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Server error" });
