@@ -2,19 +2,18 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 
 const SobeHomeStranicap = () => {
   const [sobe, setSobe] = useState([]);
 
   useEffect(() => {
     // 1. Dohvati token
-    const token = localStorage.getItem("token");
 
     // 2. Napravi fetch sa Authorization headerom
     fetch("http://localhost:8000/rooms", {
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`, // dodaj token ako postoji
       },
     })
       .then((res) => {
@@ -68,9 +67,12 @@ const SobeHomeStranicap = () => {
                 {soba.description && (
                   <p className="text-gray-600">{soba.description}</p>
                 )}
-                <button className="mt-4 bg-primary text-white px-4 py-2 rounded-md hover:bg-primary/80 transition-colors">
+                <Link
+                  href={`/rooms/${soba.id}`}
+                  className="mt-4 bg-primary text-white px-4 py-2 rounded-md hover:bg-primary/80 transition-colors"
+                >
                   Detalji
-                </button>
+                </Link>
               </div>
             </div>
           ))}

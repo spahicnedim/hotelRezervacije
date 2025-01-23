@@ -10,9 +10,9 @@ const {
 
 const { verifyToken, requireStaff } = require("../middleware/authMiddleware");
 
-router.get("/", verifyToken, getAllRooms);
+router.get("/", getAllRooms);
 
-router.get("/:id", verifyToken, getRoomById);
+router.get("/:id", getRoomById);
 
 router.post("/", verifyToken, requireStaff, createRoom);
 
