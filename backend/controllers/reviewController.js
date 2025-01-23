@@ -2,7 +2,7 @@ const prisma = require("../models/prismaClient");
 
 const createReview = async (req, res) => {
   try {
-    const userId = req.params.id;
+    const userId = req.user.userId;
     const { roomId, content, rating } = req.body;
 
     const room = await prisma.room.findUnique({
@@ -31,11 +31,11 @@ const createReview = async (req, res) => {
 
 const getAllReviewsForRoom = async (req, res) => {
   try {
-    const roomId = parseInt(req.params.id, 10);
+    const roomId = parseInt(req.params.roomId, 10);
 
     const reviews = await prisma.review.findMany({
       where: { id: roomId },
-      includes: {
+      include: {
         user: true,
       },
     });
