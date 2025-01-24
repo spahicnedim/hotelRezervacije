@@ -128,7 +128,7 @@ const updateReservation = async (req, res) => {
         },
       });
 
-      return res.json(update);
+      return res.json(updated);
     } else {
       if (reservation.userId !== req.user.userId) {
         return res.status(403).json({ error: "Nedovoljno privilegija" });

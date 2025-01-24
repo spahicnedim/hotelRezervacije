@@ -31,7 +31,11 @@ const LoginPage = () => {
 
       localStorage.setItem("token", data.token);
 
-      await router.push("/");
+      if (data.user.role === "STAFF") {
+        router.push("/admin-dashboard");
+      } else {
+        router.push("/");
+      }
     } catch (e) {
       console.error(e);
       setError(e.message);
