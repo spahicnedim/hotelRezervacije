@@ -1,0 +1,12 @@
+.reservedDate {
+    background-color: #ff7f7f; /* Svijetlo crvena boja za rezervirane datume */
+    color: white !important;
+    border-radius: 50%;
+}
+
+/* Opcionalno: Stil za istaknute datume */
+.react-datepicker__day--highlighted-custom-1 {
+    background-color: #ffcccc; /* Svijetlo crvena za istaknute datume */
+    color: white !important;
+    border-radius: 50%;
+}

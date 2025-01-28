@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
 import { usePathname, useRouter } from "next/navigation";
-import { revalidatePath } from "next/cache";
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -13,12 +12,22 @@ const Navbar = () => {
   const pathname = usePathname();
 
   useEffect(() => {
-    function handleScroll() {
-      setScrolled(window.scrollY > 50);
-    }
+    const handleScroll = () => {
+      if (window.scrollY > 50) {
+        // Prilagodi prag po potrebi
+        setScrolled(true);
+      } else {
+        setScrolled(false);
+      }
+    };
 
+    // Dodaj scroll event listener
     window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+
+    // Čišćenje event listenera prilikom unmount-a
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
   }, []);
 
   useEffect(() => {
@@ -35,34 +44,42 @@ const Navbar = () => {
     router.push("/login");
   };
 
+  const isHomePage = pathname === "/";
+
   return (
     <nav
-      className={`fixed w-full top-0 left-0 z-50 transition-colors duration-300 ${scrolled ? "bg-white shadow-md" : "bg-transparent"}`}
+      className={`fixed w-full top-0 left-0 z-50 transition-colors duration-300 ${
+        isHomePage && !scrolled ? "bg-transparent" : "bg-white shadow-md"
+      }`}
     >
       <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
         {/* Logo / Brand */}
-        <div className="text-xl text-primaryText font-bold">
+        <div
+          className={`text-xl font-bold ${
+            isHomePage && !scrolled ? "text-primaryText" : "text-gray-800"
+          }`}
+        >
           <Link href="/">LuxuryHotel</Link>
         </div>
 
         {/* Dinamički linkovi */}
-        <div className="space-x-4">
+        <div className="space-x-4 flex items-center">
           {!user && (
             <>
               {/* Ako user = null => prikaži Login / Register */}
               <Link
                 href="/login"
-                className={`${
-                  scrolled ? "text-gray-800" : "text-primaryText"
-                } font-semibold hover:opacity-80`}
+                className={`font-semibold hover:opacity-80 ${
+                  isHomePage && !scrolled ? "text-primaryText" : "text-gray-800"
+                }`}
               >
                 Login
               </Link>
               <Link
                 href="/register"
-                className={`${
-                  scrolled ? "text-gray-800" : "text-primaryText"
-                } font-semibold hover:opacity-80`}
+                className={`font-semibold hover:opacity-80 ${
+                  isHomePage && !scrolled ? "text-primaryText" : "text-gray-800"
+                }`}
               >
                 Register
               </Link>
@@ -71,28 +88,28 @@ const Navbar = () => {
 
           {user && user.role === "STAFF" && (
             <>
-              {/* Ako je user STAFF => Admin link ili nesto */}
+              {/* Ako je user STAFF => Admin Dashboard, Rooms, Logout */}
               <Link
                 href="/admin-dashboard"
-                className={`${
-                  scrolled ? "text-gray-800" : "text-primaryText"
-                } font-semibold hover:opacity-80`}
+                className={`font-semibold hover:opacity-80 ${
+                  isHomePage && !scrolled ? "text-primaryText" : "text-gray-800"
+                }`}
               >
                 Admin Dashboard
               </Link>
               <Link
                 href="/rooms"
-                className={`${
-                  scrolled ? "text-gray-800" : "text-primaryText"
-                } font-semibold hover:opacity-80`}
+                className={`font-semibold hover:opacity-80 ${
+                  isHomePage && !scrolled ? "text-primaryText" : "text-gray-800"
+                }`}
               >
                 Rooms
               </Link>
               <button
                 onClick={handleLogout}
-                className={`${
-                  scrolled ? "text-gray-800" : "text-primaryText"
-                } font-semibold hover:opacity-80`}
+                className={`font-semibold hover:opacity-80 ${
+                  isHomePage && !scrolled ? "text-primaryText" : "text-gray-800"
+                }`}
               >
                 Logout
               </button>
@@ -101,28 +118,28 @@ const Navbar = () => {
 
           {user && user.role === "GUEST" && (
             <>
-              {/* Ako je user GUEST => Rooms, MyProfile ... */}
+              {/* Ako je user GUEST => Rooms, Profile, Logout */}
               <Link
                 href="/rooms"
-                className={`${
-                  scrolled ? "text-gray-800" : "text-primaryText"
-                } font-semibold hover:opacity-80`}
+                className={`font-semibold hover:opacity-80 ${
+                  isHomePage && !scrolled ? "text-primaryText" : "text-gray-800"
+                }`}
               >
                 Rooms
               </Link>
               <Link
                 href="/profile"
-                className={`${
-                  scrolled ? "text-gray-800" : "text-primaryText"
-                } font-semibold hover:opacity-80`}
+                className={`font-semibold hover:opacity-80 ${
+                  isHomePage && !scrolled ? "text-primaryText" : "text-gray-800"
+                }`}
               >
                 Profile
               </Link>
               <button
                 onClick={handleLogout}
-                className={`${
-                  scrolled ? "text-gray-800" : "text-primaryText"
-                } font-semibold hover:opacity-80`}
+                className={`font-semibold hover:opacity-80 ${
+                  isHomePage && !scrolled ? "text-primaryText" : "text-gray-800"
+                }`}
               >
                 Logout
               </button>

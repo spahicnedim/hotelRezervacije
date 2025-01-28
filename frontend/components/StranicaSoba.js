@@ -2,13 +2,18 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { addDays, isWithinInterval } from "date-fns";
+import styles from "../app/StranicaSoba.module.css";
 
 const StranicaSoba = ({ roomId }) => {
   const [room, setRoom] = useState(null);
-  const [checkInDate, setCheckInDate] = useState("");
-  const [checkOutDate, setCheckOutDate] = useState("");
+  const [checkInDate, setCheckInDate] = useState(null);
+  const [checkOutDate, setCheckOutDate] = useState(null);
   const [reservationError, setReservationError] = useState("");
   const [reservationSuccess, setReservationSuccess] = useState("");
+  const [reservations, setReservations] = useState([] | null);
 
   // Recenzije
   const [reviews, setReviews] = useState([]);
@@ -38,11 +43,92 @@ const StranicaSoba = ({ roomId }) => {
       .catch((err) => console.error(err));
   }, [roomId]);
 
+  useEffect(() => {
+    const fetchReservations = async () => {
+      const token = localStorage.getItem("token");
+      try {
+        const res = await fetch(
+          `http://localhost:8000/reservation/room/${roomId}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+
+        console.log("Response status:", res.status); // Debugging
+        const data = await res.json();
+        console.log("Reservations data:", data); // Debugging
+
+        if (res.ok) {
+          if (Array.isArray(data)) {
+            setReservations(data);
+          } else {
+            console.error("Expected an array for reservations, but got:", data);
+            setReservations([]);
+          }
+        } else {
+          // Ako je odgovor greška, postavi rezervacije na prazan niz
+          console.error("Error fetching reservations:", data.error);
+          setReservations([]);
+        }
+      } catch (err) {
+        console.error("Fetch error:", err);
+        setReservations([]);
+      }
+    };
+
+    fetchReservations();
+  }, [roomId]);
+
+  const isDateBlocked = (date) => {
+    for (let reservation of reservations) {
+      // Ako želiš blokirati samo "CONFIRMED" rezervacije, dodaj provjeru
+      if (reservation.status !== "CONFIRMED") continue;
+
+      const checkIn = new Date(reservation.checkInDate);
+      const checkOut = new Date(reservation.checkOutDate);
+      // Check if date is within [checkIn, checkOut)
+      if (
+        isWithinInterval(date, { start: checkIn, end: addDays(checkOut, -1) })
+      ) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  const getDayClassName = (date) => {
+    for (let reservation of reservations) {
+      if (reservation.status !== "CONFIRMED") continue;
+
+      const checkIn = new Date(reservation.checkInDate);
+      const checkOut = new Date(reservation.checkOutDate);
+      if (
+        isWithinInterval(date, { start: checkIn, end: addDays(checkOut, -1) })
+      ) {
+        return styles.reservedDate; // Koristi CSS modul
+      }
+    }
+    return undefined;
+  };
+
   // Rezervacija
   const handleReservation = async (e) => {
     e.preventDefault();
     setReservationError("");
     setReservationSuccess("");
+
+    if (!checkInDate || !checkOutDate) {
+      setReservationError("Molimo odaberite datume check-in i check-out.");
+      return;
+    }
+
+    if (checkOutDate <= checkInDate) {
+      setReservationError("Check-out datum mora biti nakon check-in datuma.");
+      return;
+    }
 
     try {
       const token = localStorage.getItem("token"); // ako je zaštićena ruta
@@ -54,8 +140,8 @@ const StranicaSoba = ({ roomId }) => {
         },
         body: JSON.stringify({
           roomId: Number(roomId),
-          checkInDate,
-          checkOutDate,
+          checkInDate: checkInDate.toISOString(),
+          checkOutDate: checkOutDate.toISOString(),
         }),
       });
 
@@ -64,9 +150,12 @@ const StranicaSoba = ({ roomId }) => {
         throw new Error(errData.error || "Neuspjela rezervacija");
       }
 
+      const newReservation = await res.json();
       setReservationSuccess("Rezervacija uspješna!");
-      setCheckInDate("");
-      setCheckOutDate("");
+      setCheckInDate(null);
+      setCheckOutDate(null);
+      // Osvježi rezervacije
+      setReservations([...reservations, newReservation]);
     } catch (err) {
       setReservationError(err.message);
     }
@@ -150,7 +239,6 @@ const StranicaSoba = ({ roomId }) => {
                 {room.description}
               </p>
             )}
-            {/* OVDJE možeš ubaciti još polja: npr. cijena, max osoba, itd. */}
           </div>
 
           {/* Desni stupac: rezervacija */}
@@ -165,21 +253,33 @@ const StranicaSoba = ({ roomId }) => {
             <form onSubmit={handleReservation} className="space-y-4">
               <div>
                 <label className="block font-semibold">Check-in</label>
-                <input
-                  type="date"
-                  value={checkInDate}
-                  onChange={(e) => setCheckInDate(e.target.value)}
-                  className="border p-2 w-full"
+                <DatePicker
+                  selected={checkInDate}
+                  onChange={(date) => setCheckInDate(date)}
+                  selectsStart
+                  startDate={checkInDate}
+                  endDate={checkOutDate}
+                  minDate={new Date()}
+                  filterDate={(date) => !isDateBlocked(date)}
+                  dayClassName={getDayClassName}
+                  className="border p-2 w-full rounded"
+                  placeholderText="Odaberi datum check-in"
                   required
                 />
               </div>
               <div>
                 <label className="block font-semibold">Check-out</label>
-                <input
-                  type="date"
-                  value={checkOutDate}
-                  onChange={(e) => setCheckOutDate(e.target.value)}
-                  className="border p-2 w-full"
+                <DatePicker
+                  selected={checkOutDate}
+                  onChange={(date) => setCheckOutDate(date)}
+                  selectsEnd
+                  startDate={checkInDate}
+                  endDate={checkOutDate}
+                  minDate={checkInDate ? addDays(checkInDate, 1) : new Date()}
+                  filterDate={(date) => !isDateBlocked(date)}
+                  dayClassName={getDayClassName}
+                  className="border p-2 w-full rounded"
+                  placeholderText="Odaberi datum check-out"
                   required
                 />
               </div>
@@ -229,8 +329,8 @@ const StranicaSoba = ({ roomId }) => {
                   min="1"
                   max="5"
                   value={reviewRating}
-                  onChange={(e) => setReviewRating(e.target.value)}
-                  className="border p-2 w-full"
+                  onChange={(e) => setReviewRating(parseInt(e.target.value))}
+                  className="border p-2 w-full rounded"
                   required
                 />
               </div>
@@ -239,7 +339,7 @@ const StranicaSoba = ({ roomId }) => {
                 <textarea
                   value={reviewContent}
                   onChange={(e) => setReviewContent(e.target.value)}
-                  className="border p-2 w-full"
+                  className="border p-2 w-full rounded"
                   rows={3}
                   required
                 />

@@ -37,9 +37,19 @@ export default function ReservationsPage() {
         });
         const data = await res.json();
         setReservations(data);
-        updateChartData(data);
+
+        // Provjeri je li data niz
+        if (Array.isArray(data)) {
+          setReservations(data);
+          updateChartData(data);
+        } else if (data.reservations && Array.isArray(data.reservations)) {
+          setReservations(data.reservations);
+          updateChartData(data.reservations);
+        } else {
+          console.error("Ne očekivani format podataka:", data);
+        }
       } catch (err) {
-        console.error(err);
+        console.error("Greška pri dohvaćanju rezervacija:", err);
       }
     };
 
@@ -48,13 +58,13 @@ export default function ReservationsPage() {
 
   // Ažuriraj Chart Podatke
   const updateChartData = (allRes) => {
-    const pendingCount = allRes.filter((r) => r.status === "PENDING").length;
-    const confirmedCount = allRes.filter(
-      (r) => r.status === "CONFIRMED",
-    ).length;
-    const cancelledCount = allRes.filter(
-      (r) => r.status === "CANCELLED",
-    ).length;
+    const pendingCount = allRes?.filter((r) => r?.status === "PENDING")?.length;
+    const confirmedCount = allRes?.filter(
+      (r) => r?.status === "CONFIRMED",
+    )?.length;
+    const cancelledCount = allRes?.filter(
+      (r) => r?.status === "CANCELLED",
+    )?.length;
 
     setChartData({
       labels: ["PENDING", "CONFIRMED", "CANCELLED"],

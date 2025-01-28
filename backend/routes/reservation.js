@@ -7,6 +7,7 @@ const {
   getReservayionById,
   updateReservation,
   deleteReservation,
+  getReservationsByRoom,
 } = require("../controllers/reservationController");
 
 // middleware
@@ -28,5 +29,7 @@ router.put("/:id", verifyToken, updateReservation);
 
 // DELETE /reservation/:id
 router.delete("/:id", verifyToken, deleteReservation);
+
+router.get("/room/:roomId", verifyToken, getReservationsByRoom);
 
 module.exports = router;

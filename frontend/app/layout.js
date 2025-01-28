@@ -9,12 +9,12 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className="min-h-screen flex flex-col">
+      <body className="">
         {/* Navbar */}
         <Navbar />
 
         {/* Sadržaj stranice */}
-        <main className="flex-1 mt-16">
+        <main className="">
           {" "}
           {/* mt-16 prilagođava marginu prema visini navbar-a */}
           {children}

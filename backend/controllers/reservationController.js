@@ -182,10 +182,36 @@ const deleteReservation = async (req, res) => {
   }
 };
 
+const getReservationsByRoom = async (req, res) => {
+  try {
+    const roomId = parseInt(req.params.roomId, 10);
+    console.log(`Dohvaćanje rezervacija za sobu ID: ${roomId}`); // Debugging
+
+    if (isNaN(roomId)) {
+      return res.status(400).json({ error: "Invalid room ID" });
+    }
+
+    const reservations = await prisma.reservation.findMany({
+      where: { roomId },
+      include: {
+        user: true,
+        room: true,
+      },
+    });
+
+    console.log(`Rezervacije pronađene:`, reservations); // Debugging
+
+    return res.json(reservations);
+  } catch (error) {
+    console.error("Error in getReservationsByRoom:", error);
+    return res.status(500).json({ error: "Server error" });
+  }
+};
 module.exports = {
   createReservation,
   getReservation,
   getReservayionById,
   updateReservation,
   deleteReservation,
+  getReservationsByRoom,
 };
