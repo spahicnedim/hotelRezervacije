@@ -38,6 +38,16 @@ model Room {
 
   reservations Reservation[]
   reviews      Review[]
+  images       RoomImage[]
+}
+
+model RoomImage {
+  id     Int    @id @default(autoincrement())
+  url    String
+  roomId Int
+  room   Room   @relation(fields: [roomId], references: [id])
+
+  @@map("room_images")
 }
 
 model Reservation {

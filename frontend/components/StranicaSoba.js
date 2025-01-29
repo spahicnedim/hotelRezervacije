@@ -14,8 +14,7 @@ const StranicaSoba = ({ roomId }) => {
   const [reservationError, setReservationError] = useState("");
   const [reservationSuccess, setReservationSuccess] = useState("");
   const [reservations, setReservations] = useState([] | null);
-
-  // Recenzije
+  const [roomImages, setRoomImages] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [reviewContent, setReviewContent] = useState("");
   const [reviewRating, setReviewRating] = useState(5);
@@ -80,6 +79,21 @@ const StranicaSoba = ({ roomId }) => {
     };
 
     fetchReservations();
+  }, [roomId]);
+
+  useEffect(() => {
+    const fetchImages = async () => {
+      try {
+        const res = await fetch(`http://localhost:8000/rooms/${roomId}/images`);
+        if (!res.ok) throw new Error("Greska pri dohvatu slika");
+        const imagesData = await res.json();
+        setRoomImages(imagesData);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchImages();
   }, [roomId]);
 
   const isDateBlocked = (date) => {
@@ -226,7 +240,21 @@ const StranicaSoba = ({ roomId }) => {
           </h1>
         </div>
       </div>
-
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-6">
+        {roomImages.map((img) => (
+          <div
+            key={img.id}
+            className="relative w-full h-48 bg-gray-200 rounded overflow-hidden"
+          >
+            <Image
+              src={img.url}
+              alt="Room Image"
+              fill
+              className="object-cover"
+            />
+          </div>
+        ))}
+      </div>
       {/* GLAVNI SADRŽAJ */}
       <div className="max-w-7xl mx-auto px-4 mt-8">
         {/* Informacije o sobi i formular za rezervaciju - 2 stupca */}

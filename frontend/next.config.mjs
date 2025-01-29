@@ -4,11 +4,15 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "img.lovepik.com",
+        hostname: "**",
+        port: "",
+        pathname: "/**",
       },
       {
-        protocol: "https",
-        hostname: "imageio.forbes.com",
+        protocol: "http",
+        hostname: "**",
+        port: "",
+        pathname: "/**",
       },
     ],
   },
