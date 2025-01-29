@@ -209,7 +209,7 @@ const StranicaSoba = ({ roomId }) => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className="max-w-7xl mx-auto p-5">
       {/* HERO SLIKA */}
       <div className="relative h-96 bg-gray-300 mt-16 justify-center items-center">
         {room.imageUrl && (

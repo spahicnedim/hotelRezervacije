@@ -4,6 +4,7 @@ const authRoutes = require("./routes/auth");
 const roomRoutes = require("./routes/room");
 const reservationRoutes = require("./routes/reservation");
 const reviewRoutes = require("./routes/review");
+const profile = require("./routes/profile");
 const cors = require("cors");
 require("dotenv").config();
 
@@ -23,6 +24,7 @@ app.use("/auth", authRoutes);
 app.use("/rooms", roomRoutes);
 app.use("/reservation", reservationRoutes);
 app.use("/reviews", reviewRoutes);
+app.use("/profile", profile);
 
 // Pokretanje servera
 const PORT = 8000;
