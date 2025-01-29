@@ -173,7 +173,7 @@ export default function RoomsPage() {
   );
 
   return (
-    <div>
+    <div className="pt-10">
       <h2 className="text-2xl font-semibold mb-6 text-gray-800">
         Upravljanje Sobama
       </h2>

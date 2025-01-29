@@ -126,7 +126,7 @@ export default function StatsPage() {
   };
 
   return (
-    <div>
+    <div className="pt-10">
       <h2 className="text-2xl font-semibold mb-6 text-gray-800">Statistika</h2>
 
       {/* Pie Chart */}
